@@ -1,0 +1,126 @@
+section8- seguridad en los ms usando jwt
+
+se ejecutan los sig servicios en secuencia:
+registry,configServer,apigateway,authservice
+
+
+curl de create
+	curl --location 'localhost:8084/auth/create' \
+--header 'Content-Type: application/json' \
+--data '{
+    "userName":"MigueLe",
+    "password":"123",
+    "role":"ADMIN"
+
+}'
+
+
+
+curl login:
+
+curl --location 'localhost:8084/auth/login' \
+--header 'Content-Type: application/json' \
+--data '{
+    "userName":"MigueLe",
+    "password":"123"
+
+}'
+
+Y ESTE ULTIMO ME DEVUELVE UN TOKEN.
+
+
+
+---------------------
+
+
+creacion de clase
+
+AuthUser , class Usuario para acceso a servicios con roles
+Tokendto, CLASS DTO
+PasswordEncoder @Config.
+JWTProvider class que crea el JWT, con claims headers y signature.
+			recordar que el token siempre pide un secret(estara en app.properties) el cual va en el signature o firma del jwt.
+			JWTS crea el jwt, con las fechas exp, secret y claims(este claim tiene info del user)
+			el secret se inicia con @PostConstruct desde la misma clase JwtProvider
+			se crea metodos validar , obtenerUsername y datos de secret en app.yyml
+			
+-40
+creacion de AuthController /auth y su service AuthService
+
+-41
+
+implementacion de seguridad en apigateway
+class AuthFilter , usa programacion reactiva
+
+tal clase, se la agrega en el app.properties del API-GATEWAY, en la parte donde se configuro servicio USUARIO.
+
+se le agrega el anotation @EnableEurekaCLient en AuthService.
+
+
+-42
+Roles
+
+para recordar, el metodo validate() de JwtProvider valida el token.
+
+creacion de clases DTO . NewuserDTO
+
+curl --location 'localhost:8084/auth/create' \
+--header 'Content-Type: application/json' \
+--data '{
+    "userName":"Migue",
+    "password":"123",
+    "role":"user"
+
+}'
+
+ 
+ curl --location 'localhost:8084/auth/create' \
+--header 'Content-Type: application/json' \
+--data '{
+    "userName":"MigueAdmin",
+    "password":"12s3",
+    "role":"admin"
+
+}'
+//ME GUARDO TOKEN
+
+++ME logueo con ambos usuarios creados
+
+curl --location 'localhost:8084/auth/login' \
+--header 'Content-Type: application/json' \
+--data '{
+    "userName":"Migue",
+    "password":"123"
+
+}'
+
+ // ME GUARDO TOKEN
+ 
+ intento crear Usuario con user Migue, pero me dara erro ya que le di role:user , No 'admin'
+ 
+ curl --location 'localhost:8084/usuarios' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoidXNlciIsImlkIjoxLCJzdWIiOiJNaWd1ZSIsImlhdCI6MTcxNTI4MTk4NCwiZXhwIjoxNzE1Mjg1NTg0fQ.GohFq4lAcBScy-8wQYup4QrLO8RZXmQDxcDCaFgkMFnCvXNDCElCQaVnRacA_bB8O-dpXD-PqGtVoX5NxszelQ' \
+--data-raw '{"nombre":"jgson",
+"email":"m@s.com",
+"informacion":"info"
+}'
+
+++pruebo crear con user:MigueAdmin
+
+curl --location 'localhost:8084/usuarios' \
+--header 'Content-Type: application/json' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlIjoiYWRtaW4iLCJpZCI6Miwic3ViIjoiTWlndWVBZG1pbiIsImlhdCI6MTcxNTI4MjMyMywiZXhwIjoxNzE1Mjg1OTIzfQ.W3KX-sMaSj2jvjdAIdAuMPKZ1KTrJusZ_VsjxTnOn3U5F-sN4kBiJke1Qo7cDS_7FQMnNrkmhOQFAHefZjvaxQ' \
+--data-raw '{"nombre":"jgson",
+"email":"m@s.com",
+"informacion":"info"
+}'
+
+Lo creo BIEN !!!
+
+
+
+
+
+
+
